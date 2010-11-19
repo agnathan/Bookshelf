@@ -24,14 +24,18 @@
 #include <QItemSelectionModel>
 #include <QModelIndex>
 #include <QModelIndexList>
+#include <QMainWindow>
 
 MainWindow::MainWindow(QSqlTableModel* model, QWidget *parent) :
-    QWidget(parent),
+    QMainWindow(parent),
     m_model(model)
 {
+    QWidget* w = new QWidget();
+    setCentralWidget(w);
+
     resize(650,300);
     QVBoxLayout* vLayout = new QVBoxLayout();
-    setLayout(vLayout);
+    w->setLayout(vLayout);
 
     m_tableView = createView(model);
     vLayout->addWidget(m_tableView);
