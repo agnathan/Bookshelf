@@ -9,6 +9,9 @@ class QTableView;
 class QLineEdit;
 class QNetworkReply;
 class QKeyEvent;
+class QMenu;
+class QAction;
+class QLabel;
 
 class MainWindow : public QMainWindow
 {
@@ -25,10 +28,24 @@ private:
     QLineEdit* m_lineEdit;
     QTableView* m_tableView;
 
+    QMenu* fileMenu;
+    QMenu* optionsMenu;
+
+    QAction* exitAct;
+    QAction* apiKeyDialogAct;
+
+    QLabel* infoLabel;
+
+private:
+    void createActions();
+    void createMenus();
+
 private slots:
     void addNewRow();
     void removeRow();
     void replyFinished(QNetworkReply* reply);
+
+    void apiKeyDialogShow();
 
 signals:
 

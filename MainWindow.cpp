@@ -25,13 +25,18 @@
 #include <QModelIndex>
 #include <QModelIndexList>
 #include <QMainWindow>
+#include <QMenuBar>
+
 
 MainWindow::MainWindow(QSqlTableModel* model, QWidget *parent) :
-    QMainWindow(parent),
-    m_model(model)
+        QMainWindow(parent),
+        m_model(model)
 {
     QWidget* w = new QWidget();
     setCentralWidget(w);
+
+    createMenus();
+    createActions();
 
     resize(650,300);
     QVBoxLayout* vLayout = new QVBoxLayout();
@@ -82,7 +87,7 @@ void MainWindow::getIsbnInfo(const QString& isbn)
 
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
     bool ok = connect(manager, SIGNAL(finished(QNetworkReply*)),
-                        this, SLOT(replyFinished(QNetworkReply*)));
+                      this, SLOT(replyFinished(QNetworkReply*)));
     Q_ASSERT(ok);
 
     QString isbnUrl = "http://isbndb.com/api/books.xml?access_key=";
@@ -99,7 +104,7 @@ void MainWindow::replyFinished(QNetworkReply* reply)
 
     QByteArray data = reply->readAll();
 
-/* Example data returned
+    /* Example data returned
 
 <ISBNdb server_time="2010-10-30T18:16:28Z">
 <BookList total_results="1" page_size="10" page_number="1" shown_results="1">
@@ -176,3 +181,32 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         break;
     }
 }
+
+void MainWindow::createActions() {
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(exitAct);
+
+    optionsMenu = menuBar()->addMenu(tr("&Options"));
+    optionsMenu->addAction(apiKeyDialogAct);
+}
+
+
+void MainWindow::createMenus() {
+    exitAct = new QAction(tr("E&xit"), this);
+    exitAct->setShortcuts(QKeySequence::Quit);
+    exitAct->setStatusTip(tr("Exit the application"));
+    connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
+
+    apiKeyDialogAct = new QAction(tr("API &Keys"), this);
+    apiKeyDialogAct->setStatusTip(tr("Enter you book developer API keys"));
+    connect(apiKeyDialogAct, SIGNAL(triggered()), this, SLOT(apiKeyDialogShow()));
+}
+
+void MainWindow::apiKeyDialogShow()
+{
+    QDialog *apiKeyDialog = (QDialog *)
+        QWidgetFactory::create( "accountinfodialog.ui" );
+
+    apiKeyDialog->exec();
+}
+
