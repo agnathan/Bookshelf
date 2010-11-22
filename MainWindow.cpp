@@ -231,6 +231,7 @@ void MainWindow::apiKeyDialogShow()
 
 void MainWindow::bookSelectionChanged(const QModelIndex& m, const QModelIndex& n)
 {
+    Q_UNUSED(n);
     qDebug() << "Called bookSelectionChanged() --> (" << m.row() << "," << m.column() << ") : " << m_model->data(m);
 }
 

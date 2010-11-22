@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "bookdetailsview.h"
 
 class QString;
 class QSqlTableModel;
@@ -11,6 +12,7 @@ class QNetworkReply;
 class QKeyEvent;
 class QMenu;
 class QAction;
+class QModelIndex;
 class QLabel;
 
 class MainWindow : public QMainWindow
@@ -24,6 +26,7 @@ private:
     QTableView* createView(QSqlTableModel* model);
     void getIsbnInfo(const QString& isbn);
 
+    BookDetailsView* m_bookDetailsView;
     QSqlTableModel* m_model;
     QLineEdit* m_lineEdit;
     QTableView* m_tableView;
@@ -50,7 +53,7 @@ private slots:
 signals:
 
 public slots:
-
+    void bookSelectionChanged(const QModelIndex& m, const QModelIndex& n);
 };
 
 #endif // MAINWINDOW_H
