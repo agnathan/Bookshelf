@@ -1,4 +1,7 @@
 #include "MainWindow.h"
+#include "accountinfodialog.h"
+#include "bookdetailsview.h"
+
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLineEdit>
@@ -42,6 +45,9 @@ MainWindow::MainWindow(QSqlTableModel* model, QWidget *parent) :
     QVBoxLayout* vLayout = new QVBoxLayout();
     w->setLayout(vLayout);
 
+    m_bookDetailsView = new BookDetailsView();
+    vLayout->addWidget(m_bookDetailsView);
+
     m_tableView = createView(model);
     vLayout->addWidget(m_tableView);
 
@@ -65,8 +71,17 @@ QTableView* MainWindow::createView(QSqlTableModel *model)
 {
     QTableView *view = new QTableView;
     view->setModel(model);
+
     view->horizontalHeader()->setStretchLastSection(true);
     view->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
+    // Setup the connections
+    connect(view, SIGNAL(activated(QModelIndex)), this, SLOT(bookRowActivated(QModelIndex)));
+    connect(view, SIGNAL(clicked(QModelIndex)), this, SLOT(bookRowClicked(QModelIndex)));
+
+    connect(view->selectionModel(), SIGNAL(currentChanged(const QModelIndex& , const QModelIndex&)),
+            this, SLOT(bookSelectionChanged(const QModelIndex& , const QModelIndex&)));
+
     return view;
 }
 
@@ -163,6 +178,10 @@ void MainWindow::replyFinished(QNetworkReply* reply)
     record.setValue(3,publisher);
     int row = m_model->rowCount();
     m_model->insertRecord(row,record);
+    m_tableView->scrollToBottom();
+
+    m_lineEdit->clear();
+    m_lineEdit->setFocus();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -180,6 +199,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         };
         break;
     }
+
 }
 
 void MainWindow::createActions() {
@@ -190,7 +210,6 @@ void MainWindow::createActions() {
     optionsMenu->addAction(apiKeyDialogAct);
 }
 
-
 void MainWindow::createMenus() {
     exitAct = new QAction(tr("E&xit"), this);
     exitAct->setShortcuts(QKeySequence::Quit);
@@ -199,14 +218,19 @@ void MainWindow::createMenus() {
 
     apiKeyDialogAct = new QAction(tr("API &Keys"), this);
     apiKeyDialogAct->setStatusTip(tr("Enter you book developer API keys"));
+
+    // Setup the connections
     connect(apiKeyDialogAct, SIGNAL(triggered()), this, SLOT(apiKeyDialogShow()));
 }
 
 void MainWindow::apiKeyDialogShow()
 {
-    QDialog *apiKeyDialog = (QDialog *)
-        QWidgetFactory::create( "accountinfodialog.ui" );
+    AccountInfoDialog* d = new AccountInfoDialog();
+    d->exec();
+}
 
-    apiKeyDialog->exec();
+void MainWindow::bookSelectionChanged(const QModelIndex& m, const QModelIndex& n)
+{
+    qDebug() << "Called bookSelectionChanged() --> (" << m.row() << "," << m.column() << ") : " << m_model->data(m);
 }
 
